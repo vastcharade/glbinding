@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="glbinding : A customizable C++ binding for the OpenGL API, generated using the gl.xml specification. ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>glbinding</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/hpicgs/glbinding">View on GitHub</a>
+
+          <h1 id="project_title">glbinding</h1>
+          <h2 id="project_tagline">A customizable C++ binding for the OpenGL API, generated using the gl.xml specification. </h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/hpicgs/glbinding/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/hpicgs/glbinding/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><img src="https://raw.githubusercontent.com/hpicgs/glbinding/master/glbinding-logo.svg" alt="Alt glbinding">
+<img src="https://raw.githubusercontent.com/hpicgs/glbinding/master/glbinding-logo.svg"></p>
+
+<p>glbinding-1.0.2 was just released: <a href="https://github.com/hpicgs/glbinding/releases/tag/v1.0.2">goto release</a></p>
+
+<p><em>glbinding</em> is a generated, cross-platform C++ binding for OpenGL which is solely based on the new xml-based OpenGL API specification (<a href="https://cvs.khronos.org/svn/repos/ogl/trunk/doc/registry/public/api/gl.xml">gl.xml</a>). It is a fully fledged OpenGL API binding compatible with current code based on other C bindings, e.g., <a href="http://glew.sourceforge.net/">GLEW</a>. The binding is generated using python scripts and templates, that can be easily adapted to fit custom needs.
+<em>glbinding</em> can be used as an alternative to GLEW and other projects, e.g., <a href="https://github.com/Dav1dde/glad">glad</a>, <a href="https://github.com/skaslev/gl3w">gl3w</a>, <a href="https://bitbucket.org/alfonse/glloadgen/overview">glLoadGen</a>, <a href="http://glsdk.sourceforge.net/docs/html/group__module__glload.html">glload</a>, and <a href="https://github.com/ginkgo/flextGL">flextGL</a>.</p>
+
+<p><em>glbinding</em> leverages modern C++11 features like enum classes, lambdas, and variadic templates, instead of relying on macros (all OpenGL symbols are real functions and variables). It provides <a href="#type-safe-parameters">type-safe parameters</a>, <a href="#per-feature-api-header">per feature API header</a>, <a href="#lazy-function-pointer-resolution">lazy function resolution</a>, <a href="#multi-context-support">multi-context</a> and <a href="#multi-threading-support">multi-thread</a> support, <a href="#function-callbacks">global</a> function callbacks, <a href="#meta-information">meta information</a> about the generated OpenGL binding and the OpenGL runtime, as well as multiple <a href="https://github.com/hpicgs/glbinding/wiki/examples">examples</a> for quick-starting your projects. </p>
+
+<p>Current gl code, written with a typical C binding for OpenGL is fully compatible for the use with <em>glbinding</em>.
+Just replace all includes to the old binding and use the appropriate api namespace, e.g., <code>gl</code>: </p>
+
+<div class="highlight highlight-c++"><pre><span class="cp">#include &lt;glbinding/gl/gl.h&gt;</span>
+<span class="cp">#include &lt;glbinding/Binding.h&gt;</span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">gl</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="c1">// create context, e.g. using GLFW, Qt, SDL, GLUT, ...</span>
+
+  <span class="n">glbinding</span><span class="o">::</span><span class="n">Binding</span><span class="o">::</span><span class="n">initialize</span><span class="p">();</span>
+
+  <span class="n">glBegin</span><span class="p">(</span><span class="n">GL_TRIANGLES</span><span class="p">);</span>
+  <span class="c1">// ...</span>
+  <span class="n">glEnd</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<h5>
+<a name="type-safe-parameters" class="anchor" href="#type-safe-parameters"><span class="octicon octicon-link"></span></a>Type-Safe Parameters</h5>
+
+<p>Every parameter of an OpenGL function expects a specific type of value and <em>glbinding</em> enforces, if possible, this type in its interface. This results in the following behavior:</p>
+
+<div class="highlight highlight-c++"><pre><span class="n">glClear</span><span class="p">(</span><span class="n">GL_COLOR_BUFFER_BIT</span><span class="p">);</span> <span class="c1">// valid</span>
+<span class="n">glClear</span><span class="p">(</span><span class="n">GL_FRAMEBUFFER</span><span class="p">);</span>      <span class="c1">// compile error: bitfield of group ClearBufferMask expected, got GLenum</span>
+</pre></div>
+
+<p>For bitfields there are extensively specified groups that are additionally used to enforce type-safety (a bitfield value can be used by several groups). Combinations of bitfields that share no group results in a compile error.</p>
+
+<div class="highlight highlight-c++"><pre><span class="n">glClear</span><span class="p">(</span><span class="n">GL_COLOR_BUFFER_BIT</span> <span class="o">|</span> <span class="n">GL_DEPTH_BUFFER_BIT</span><span class="p">);</span> <span class="c1">// valid</span>
+<span class="n">glClear</span><span class="p">(</span><span class="n">GL_COLOR_BUFFER_BIT</span> <span class="o">|</span> <span class="n">GL_MAP_READ_BIT</span><span class="p">);</span>     <span class="c1">// compile error: both bitfields share no group</span>
+
+<span class="n">glClear</span><span class="p">(</span><span class="n">GL_STENCIL_BUFFER_BIT</span> <span class="o">|</span> <span class="n">GL_LIGHTING_BIT</span><span class="p">);</span>   <span class="c1">// compile error: bitwise or operation is valid, </span>
+                                                    <span class="c1">//  the shared group is AttribMask, but the</span>
+                                                    <span class="c1">//  resulting group does not match the expected.</span>
+</pre></div>
+
+<p>The groups for enums are not yet as complete as we would like them to be to enable per function compile time errors when trying to call functions with values from the wrong enum group. For example, <code>GL_VERTEX_SHADER</code> is in the group <code>ShaderType</code> and <code>GL_COMPUTE_SHADER</code> is not.</p>
+
+<h5>
+<a name="per-feature-api-header" class="anchor" href="#per-feature-api-header"><span class="octicon octicon-link"></span></a>Per Feature API Header</h5>
+
+<p>Enums, bitfields, and functions can be included as usual in a combined <code>gl.h</code> header or individually via <code>bitfield.h</code>, <code>enum.h</code>, and <code>functions.h</code> respectively. Additionally, these headers are available for  featured-based API subsets, each using a specialized namespace, e.g.:</p>
+
+<ul>
+<li>
+<code>functions32.h</code> provides all OpenGL commands available up to 3.2 in namespace <code>gl32</code>.</li>
+<li>
+<code>functions32core.h</code> provides all non-deprecated OpenGL commands available up to 3.2 in namespace <code>gl32core</code>.</li>
+<li>
+<code>functions32ext.h</code> provides all OpenGL commands specified either in 3.3 and above, or by extension in <code>gl32ext</code>.</li>
+</ul>
+
+<p>Depending on the intended use-case, this allows to (1) limit coding to a specific OpenGL feature and (2) reduces switching to other features to a replacement of includes and using directives. In both cases, non-featured symbols do not compile.</p>
+
+<p>Furthermore, <em>glbinding</em> provides explicit, non-feature dependent headers for special values (<code>values.h</code>), booleans (<code>boolean.h</code>), and basic types (<code>types.h</code>). This allows for refined includes and can reduce compile time.</p>
+
+<h5>
+<a name="lazy-function-pointer-resolution" class="anchor" href="#lazy-function-pointer-resolution"><span class="octicon octicon-link"></span></a>Lazy Function Pointer Resolution</h5>
+
+<p>By default, <em>glbinding</em> tries to resolve all OpenGL function pointers during initialization, which can consume some time:</p>
+
+<div class="highlight highlight-c++"><pre><span class="n">glbinding</span><span class="o">::</span><span class="n">Binding</span><span class="o">::</span><span class="n">initialize</span><span class="p">();</span> <span class="c1">// immediate function pointer resolution</span>
+</pre></div>
+
+<p>Alternatively, the user can decide that functions pointers are resolved only when used for the first time. This is achieved by:</p>
+
+<div class="highlight highlight-c++"><pre><span class="n">glbinding</span><span class="o">::</span><span class="n">Binding</span><span class="o">::</span><span class="n">initialize</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span> <span class="c1">// lazy function pointer resolution</span>
+</pre></div>
+
+<h5>
+<a name="multi-context-support" class="anchor" href="#multi-context-support"><span class="octicon octicon-link"></span></a>Multi-Context Support</h5>
+
+<p><em>glbinding</em> has built-in support for multiple contexts. The only requirement is, that the currently active context has to be specified. This feature mixes well with multi-threaded applications, but keep in mind that concurrent use of one context often result in non-meaningful communication with the OpenGL driver.</p>
+
+<p>To use multiple contexts, use your favorite context creation library (e.g., glut, SDL, egl, glfw, Qt) to request as much contexts as required. The functions to make a context current should be provided by this library and is not part of <em>glbinding</em> (except that you can get the current context handle). When using multiple contexts, first, each has to be initialized when active: </p>
+
+<div class="highlight highlight-c++"><pre><span class="c1">// use context library to make current, e.g., glfwMakeCurrent(...)</span>
+<span class="n">glbinding</span><span class="o">::</span><span class="n">Binding</span><span class="o">::</span><span class="n">initialize</span><span class="p">();</span>
+</pre></div>
+
+<p>Second, contexts switches are required to be communicated to <em>glinding</em> explicitly in order to have correctly dispatched function pointers:</p>
+
+<div class="highlight highlight-c++"><pre><span class="c1">// use the current active context</span>
+<span class="n">glbinding</span><span class="o">::</span><span class="n">Binding</span><span class="o">::</span><span class="n">useCurrentContext</span><span class="p">();</span>               
+
+<span class="c1">// use another context, identified by platform-specific handle</span>
+<span class="n">glbinding</span><span class="o">::</span><span class="n">Binding</span><span class="o">::</span><span class="n">useContext</span><span class="p">(</span><span class="n">ContextHandle</span> <span class="n">context</span><span class="p">);</span> 
+</pre></div>
+
+<p>This feature is mainly intended for platforms where function pointers for different requested OpenGL features may vary.</p>
+
+<h5>
+<a name="multi-threading-support" class="anchor" href="#multi-threading-support"><span class="octicon octicon-link"></span></a>Multi-Threading Support</h5>
+
+<p>Concurrent use of <em>glbinding</em> is mainly intended to the usage of multiple contexts in different threads (multiple threads operating on a single OpenGL context requires locking, which <em>glbinding</em> will not provide).
+For this, <em>glbinding</em> supports multiple active contexts, one per thread. This necessitates that <em>glbinding</em> gets informed in each thread which context is currently active (see <a href="#multi-context-support">multi-context</a>).</p>
+
+<h5>
+<a name="function-callbacks" class="anchor" href="#function-callbacks"><span class="octicon octicon-link"></span></a>Function Callbacks</h5>
+
+<p><em>glbinding</em> supports different types of callbacks that can be registered.
+The main types are</p>
+
+<ul>
+<li>Before callbacks, that are called before the OpenGL function is called</li>
+<li>After callbacks, that are called after the OpenGL function call</li>
+<li>Unresolved callbacks, that are called each time an unresolved OpenGL function should be called (instead of a segmentation fault)</li>
+</ul>
+
+<p>The before callbacks are useful , e.g., for tracing or application-specific parameter checking.
+The available informations in this callback are the wrapped OpenGL function (including its name and bound function address) and all parameters.
+The after callbacks are useful, .e.g., for tracing, logging, or the obligatory error check.
+Available informations are extended by the return value.
+The unresolved callback provides information about the (unresolved) wrapped OpenGL function object.</p>
+
+<p>All callbacks are currently global (per thread, per context, and per function) but are intended to become local in the future.</p>
+
+<p>Example for error checking:</p>
+
+<div class="highlight highlight-c++"><pre><span class="cp">#include &lt;glbinding/callbacks.h&gt;</span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">glbinding</span><span class="p">;</span>
+
+<span class="c1">// ...</span>
+<span class="n">setCallbackMask</span><span class="p">(</span><span class="n">CallbackMask</span><span class="o">::</span><span class="n">After</span><span class="p">);</span>
+<span class="n">setAfterCallback</span><span class="p">([](</span><span class="k">const</span> <span class="n">FunctionCall</span> <span class="o">&amp;</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">GLenum</span> <span class="n">error</span> <span class="o">=</span> <span class="n">glGetError</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">error</span> <span class="o">!=</span> <span class="n">GL_NO_ERROR</span><span class="p">)</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"error: "</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">hex</span> <span class="o">&lt;&lt;</span> <span class="n">error</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="c1">// ... OpenGL code</span>
+</pre></div>
+
+<p>Example for logging:</p>
+
+<div class="highlight highlight-c++"><pre><span class="cp">#include &lt;glbinding/callbacks.h&gt;</span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">glbinding</span><span class="p">;</span>
+
+<span class="c1">// ...</span>
+<span class="n">setCallbackMask</span><span class="p">(</span><span class="n">CallbackMask</span><span class="o">::</span><span class="n">After</span> <span class="o">|</span> <span class="n">CallbackMask</span><span class="o">::</span><span class="n">ParametersAndReturnValue</span><span class="p">);</span>
+<span class="n">glbinding</span><span class="o">::</span><span class="n">setAfterCallback</span><span class="p">([](</span><span class="k">const</span> <span class="n">glbinding</span><span class="o">::</span><span class="n">FunctionCall</span> <span class="o">&amp;</span> <span class="n">call</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">call</span><span class="p">.</span><span class="n">function</span><span class="p">.</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"("</span><span class="p">;</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">call</span><span class="p">.</span><span class="n">parameters</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">call</span><span class="p">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">asString</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">call</span><span class="p">.</span><span class="n">parameters</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">", "</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">")"</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">call</span><span class="p">.</span><span class="n">returnValue</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">" -&gt; "</span> <span class="o">&lt;&lt;</span> <span class="n">call</span><span class="p">.</span><span class="n">returnValue</span><span class="o">-&gt;</span><span class="n">asString</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="c1">// ... OpenGL code</span>
+</pre></div>
+
+<h5>
+<a name="meta-information" class="anchor" href="#meta-information"><span class="octicon octicon-link"></span></a>Meta Information</h5>
+
+<p>Besides an actual OpenGL binding, <em>glbinding</em> also supports queries for both compile time and compile time information about the gl.xml and your OpenGL driver.
+Typical use cases are querying the available OpenGL extensions or the associated extensions to an OpenGL feature and their functions and enums.</p>
+
+<p>Example list of all available OpenGL versions/features (compile time):</p>
+
+<div class="highlight highlight-c++"><pre><span class="cp">#include &lt;glbinding/Meta.h&gt;</span>
+
+<span class="k">using</span> <span class="n">glbinding</span><span class="o">::</span><span class="n">Meta</span><span class="p">;</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="n">Version</span> <span class="nl">v</span> <span class="p">:</span> <span class="n">Meta</span><span class="o">::</span><span class="n">versions</span><span class="p">())</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">v</span><span class="p">.</span><span class="n">toString</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+
+<p>Example output of all enums (compile time):</p>
+
+<div class="highlight highlight-c++"><pre><span class="cp">#include &lt;glbinding/Meta.h&gt;</span>
+
+<span class="k">using</span> <span class="n">glbinding</span><span class="o">::</span><span class="n">Meta</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">Meta</span><span class="o">::</span><span class="n">stringsByGL</span><span class="p">())</span>
+<span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"# Enums: "</span> <span class="o">&lt;&lt;</span> <span class="n">Meta</span><span class="o">::</span><span class="n">enums</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="n">GLenum</span> <span class="nl">e</span> <span class="p">:</span> <span class="n">Meta</span><span class="o">::</span><span class="n">enums</span><span class="p">())</span> <span class="c1">// c++ 14 ...</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">" ("</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">hex</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">showbase</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">internal</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">setfill</span><span class="p">(</span><span class="sc">'0'</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">setw</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> 
+              <span class="o">&lt;&lt;</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">underlying_type</span><span class="o">&lt;</span><span class="n">GLenum</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&gt;</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">") "</span> <span class="o">&lt;&lt;</span> <span class="n">Meta</span><span class="o">::</span><span class="n">getString</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">dec</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">dec</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Example output of all available extensions (run time):</p>
+
+<div class="highlight highlight-c++"><pre><span class="cp">#include &lt;glbinding/Meta.h&gt;</span>
+
+<span class="k">using</span> <span class="n">glbinding</span><span class="o">::</span><span class="n">Meta</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">Meta</span><span class="o">::</span><span class="n">stringsByGL</span><span class="p">())</span>
+<span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">" # Extensions: "</span> <span class="o">&lt;&lt;</span> <span class="n">Meta</span><span class="o">::</span><span class="n">extensions</span><span class="p">().</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="n">GLextension</span> <span class="nl">e</span> <span class="p">:</span> <span class="n">Meta</span><span class="o">::</span><span class="n">extensions</span><span class="p">())</span>
+  <span class="p">{</span>
+    <span class="k">const</span> <span class="n">Version</span> <span class="n">v</span> <span class="o">=</span> <span class="n">Meta</span><span class="o">::</span><span class="n">getRequiringVersion</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="n">Meta</span><span class="o">::</span><span class="n">getString</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">?</span> <span class="s">""</span> <span class="o">:</span> <span class="n">v</span><span class="p">.</span><span class="n">toString</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h5>
+<a name="performance" class="anchor" href="#performance"><span class="octicon octicon-link"></span></a>Performance</h5>
+
+<p><em>glbinding</em> causes no signigicant impact on runtime performance. The provided comparison example supports this statement. It compares the execution times of identical rendering code, dispatched once with <em>glbinding</em> and once with glew. Various results are provided in the <a href="https://github.com/hpicgs/glbinding/wiki/examples">Examples</a> wiki.</p>
+
+<h5>
+<a name="binding-generation" class="anchor" href="#binding-generation"><span class="octicon octicon-link"></span></a>Binding Generation</h5>
+
+<p>As a user of glbinding you are able to update the gl.xml by yourself and generate the glbinding code.
+The necessary python scripts are provided in this repository. Since the <code>gl.xml</code> is not complete, a <code>patch.xml</code> is used to resolve possible conflicts or missing specifications. With ongoing development of the xml-based OpenGL API specification this could become obsolete in the future.</p>
+
+
+
+<h2>
+<a name="using-glbinding" class="anchor" href="#using-glbinding"><span class="octicon octicon-link"></span></a>Using glbinding</h2>
+
+<h5>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h5>
+
+<p>The only run-time dependencies of glbinding are the STL of the used compiler and an OpenGL library, dynamically linked with your application.</p>
+
+<p>Optional dependencies</p>
+
+<ul>
+<li>Python 2 or 3 to generate the binding</li>
+<li>Qt for some examples</li>
+<li>
+<a href="http://www.glfw.org/">GLFW 3</a> for some examples</li>
+<li>GLEW for some examples</li>
+</ul>
+
+<p>For building <em>glbinding</em> CMake 2.8.12 or newer and a C++11 compliant compiler (e.g. GCC 4.7, Clang 3.3, MSVC 2013 <strong>Update 3</strong>) are required.</p>
+
+<p>When configuring <em>glbinding</em>, the options <code>OPTION_BUILD_EXAMPLES</code>, <code>OPTION_GL_BY_STRINGS</code>, and <code>OPTION_STRINGS_BY_GL</code> can be used to enable example builds (qt-cubescape is only enabled when Qt5 is found), allow string-to-symbol and symbol-to-string conversion respectively (in <code>Meta</code>). <code>OPTION_GL_BY_STRINGS</code> is disabled by default, since it increases build time for the MSVC 2013 compiler.</p>
+
+<h5>
+<a name="linking-binaries" class="anchor" href="#linking-binaries"><span class="octicon octicon-link"></span></a>Linking binaries</h5>
+
+<p>In order to link <em>glbinding</em> the <em>glbinding</em> path can be added to the <code>CMAKE_PREFIX_PATH</code> and <code>find_package(glbinding REQUIRED)</code> can be used in the appropriate <code>CMakeLists.txt</code>. <code>GLBINDING_INCLUDES</code> and <code>GLBINDING_LIBRARIES</code> can then be added to include dirs and target libraries.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">glbinding maintained by <a href="https://github.com/hpicgs">hpicgs</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-56090114-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
