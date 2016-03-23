@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['simplefunctioncallback',['SimpleFunctionCallback',['../namespaceglbinding.html#a29e5babc65f9d418cdeb1d12b3011e6f',1,'glbinding']]]
+  ['procaddress',['ProcAddress',['../namespaceglbinding.html#ab7c5ad7ce6a933b93b15fa245096b6f9',1,'glbinding']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['procaddress',['ProcAddress',['../namespaceglbinding.html#ab7c5ad7ce6a933b93b15fa245096b6f9',1,'glbinding']]]
+  ['logentry',['LogEntry',['../namespaceglbinding_1_1logging.html#a8950602c2f23184635d33907e13464a1',1,'glbinding::logging']]]
 ];

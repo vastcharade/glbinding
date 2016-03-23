@@ -934,7 +934,5 @@ var searchData=
   ['function_3c_20void_2c_20gl_3a_3amemorybarriermask_20_3e',['Function&lt; void, gl::MemoryBarrierMask &gt;',['../classglbinding_1_1_function.html',1,'glbinding']]],
   ['function_3c_20void_2c_20gl_3a_3apathrenderingmasknv_2c_20gl_3a_3aglsizei_2c_20gl_3a_3aglenum_2c_20const_20void_20_2a_2c_20gl_3a_3agluint_2c_20gl_3a_3aglsizei_2c_20gl_3a_3aglfloat_20_2a_20_3e',['Function&lt; void, gl::PathRenderingMaskNV, gl::GLsizei, gl::GLenum, const void *, gl::GLuint, gl::GLsizei, gl::GLfloat * &gt;',['../classglbinding_1_1_function.html',1,'glbinding']]],
   ['function_3c_20void_2c_20gl_3a_3apathrenderingmasknv_2c_20gl_3a_3agluint_2c_20gl_3a_3aglsizei_2c_20gl_3a_3aglsizei_2c_20gl_3a_3aglfloat_20_2a_20_3e',['Function&lt; void, gl::PathRenderingMaskNV, gl::GLuint, gl::GLsizei, gl::GLsizei, gl::GLfloat * &gt;',['../classglbinding_1_1_function.html',1,'glbinding']]],
-  ['functioncall',['FunctionCall',['../structglbinding_1_1_function_call.html',1,'glbinding']]],
-  ['functionhelper',['FunctionHelper',['../structglbinding_1_1_function_helper.html',1,'glbinding']]],
-  ['functionhelper_3c_20void_2c_20arguments_2e_2e_2e_20_3e',['FunctionHelper&lt; void, Arguments... &gt;',['../structglbinding_1_1_function_helper_3_01void_00_01_arguments_8_8_8_01_4.html',1,'glbinding']]]
+  ['functioncall',['FunctionCall',['../structglbinding_1_1_function_call.html',1,'glbinding']]]
 ];
