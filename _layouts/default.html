@@ -1,0 +1,14 @@
+---
+#layout: compress
+---
+{% assign layout = 'default' %}
+<!DOCTYPE html>
+<html lang="{{ page.lang }}">
+{% include head.html %}
+<body onload="initPage(true)" id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
+{% include navbar.html %}
+<section id="content" class="container">
+{{ content }}
+</section>
+</body>
+</html>

@@ -1,1 +1,23 @@
+
+title: 'glbinding'
+author: 'CG Internals, Potsdam, Germany'
+
+google_font_sans_serif: 'Source+Sans+Pro:600,300'
+google_font_monospace: 'Source+Code+Pro:400'
+
+# Handling Reading
+safe: true
+encoding: utf-8
+
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+
 include: [ "*.html" ]
+
+#sass:
+#  style: compressed
