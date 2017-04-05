@@ -9,6 +9,13 @@ google_font_monospace: 'Source+Code+Pro:400'
 safe: true
 encoding: utf-8
 
+documentations:
+  - master
+  - v2.1
+  - v2.0
+  - v1.1
+  - v1.0
+
 markdown: kramdown
 highlighter: rouge
 kramdown:
