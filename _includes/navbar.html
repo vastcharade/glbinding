@@ -14,7 +14,7 @@
       <span class="icon-github"></span>
     </a>
     <span class="dropdown-divider"></span>
-    <span class="dropdown-item"><a class="dropdown-item" href="{{ site.baseurl }}/docs">Documentations</a></span>
+    <a class="dropdown-item" href="{{ site.baseurl }}/docs">Documentations</a>
     {% for s in site.documentations %}
       <a class="dropdown-item" href="{{ site.baseurl }}/docs/{{ s }}">{{ s }}</a>
     {% endfor %}
@@ -27,7 +27,7 @@
           <span class="icon-github"></span>
         </a>
       </li>
-      <li class="nav-item active"><a class="nav-link" href="{{ site.baseurl }}/docs">Documentations</a><span class="nav-link">:</span></li>
+      <li class="nav-item active"><a class="nav-link" href="{{ site.baseurl }}/docs">Documentations</a></li>
       {% for s in site.documentations %}
         <li class="nav-item"><a class="nav-link" href="{{ site.baseurl }}/docs/{{ s }}">{{ s }}</a></li>
       {% endfor %}
