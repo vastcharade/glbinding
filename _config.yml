@@ -12,7 +12,7 @@ encoding: utf-8
 markdown: kramdown
 highlighter: rouge
 kramdown:
-  hard_wrap:      true
+  hard_wrap: false
   input: GFM
   syntax_highlighter: rouge
   syntax_highlighter_opts:
