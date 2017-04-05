@@ -12,6 +12,7 @@ encoding: utf-8
 markdown: kramdown
 highlighter: rouge
 kramdown:
+  hard_wrap:      true
   input: GFM
   syntax_highlighter: rouge
   syntax_highlighter_opts:
@@ -19,5 +20,5 @@ kramdown:
 
 include: [ "*.html" ]
 
-#sass:
-#  style: compressed
+sass:
+  style: compressed

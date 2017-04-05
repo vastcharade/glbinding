@@ -16,11 +16,6 @@ function initPage(demo)
         // finally, scroll!
 		$(window).scrollTop(scroll);
     }
-
-    if(!demo)
-        return;
-
-	demo_gl();
 }
 
 function scrollAwareHRef(object, href)
@@ -42,3 +37,7 @@ function getURLParameter(sParam)
     }
     return null;
 }
+
+$(function() {
+    $("table").addClass("table table-sm");
+});

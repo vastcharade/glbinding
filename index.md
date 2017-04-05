@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: markdown
 ---
 ![glbinding](glbinding-logo.png)
 
