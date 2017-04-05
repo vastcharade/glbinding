@@ -1,5 +1,6 @@
 ---
 layout: markdown
+link_to_home: false
 ---
 ![glbinding](glbinding-logo.png)
 
