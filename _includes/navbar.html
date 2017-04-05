@@ -9,15 +9,25 @@
     </ul>
   <button class="navbar-toggler hidden-sm-up pull-xs-right" type="button" data-toggle="dropdown" id="sections-toggler"  aria-haspopup="true">&#9776;</button>
   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sections-toggler">
-    <span class="dropdown-item">Documentations</span>
+    <a class="dropdown-item" href="https://github.com/cginternals/glbinding">
+      View on Github
+      <span class="icon-github"></span>
+    </a>
     <span class="dropdown-divider"></span>
+    <span class="dropdown-item">Documentations</span>
     {% for s in site.documentations %}
       <a class="dropdown-item" href="docs/{{ s }}">{{ s }}</a>
     {% endfor %}
   </div>
   <div class="collapse navbar-toggleable-xs">
     <ul class="nav navbar-nav pull-xs-right">
-      <li class="nav-item active"><span class="nav-link">Documentations</span></li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://github.com/cginternals/glbinding">
+          View on Github
+          <span class="icon-github"></span>
+        </a>
+      </li>
+      <li class="nav-item active"><span class="nav-link">Documentations:</span></li>
       {% for s in site.documentations %}
         <li class="nav-item"><a class="nav-link" href="docs/{{ s }}">{{ s }}</a></li>
       {% endfor %}
