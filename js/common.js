@@ -1,4 +1,6 @@
-
+---
+layout: compress
+---
 function initPage(demo)
 {
 	var scroll = getURLParameter("scroll");
