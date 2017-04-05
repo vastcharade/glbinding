@@ -3,7 +3,7 @@
 $( document ).ready(function() {
     $("#projectlogo").each(function() {
         var td = $(this);
-        td.html($("<a>").attr("href", "{{ site.baseurl }}").append(td.html()));
+        td.html($("<a>").attr("href", "{{ site.baseurl }}/").append(td.html()));
     });
     
     $("div.headertitle").addClass("page-header");

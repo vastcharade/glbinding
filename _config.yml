@@ -16,6 +16,13 @@ documentations:
   - v1.1
   - v1.0
 
+documentation_states:
+  master: info
+  v2.1: success
+  v2.0: warning
+  v1.1: danger
+  v1.0: danger
+
 markdown: kramdown
 highlighter: rouge
 kramdown:

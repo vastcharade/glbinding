@@ -4,11 +4,10 @@ link_to_home: true
 ---
 <p><img src="{{ site.baseurl }}/glbinding-logo.png" alt="glbinding"></p> <p><em>glbinding</em> is an <a href="http://opensource.org/licenses/MIT">MIT licensed</a>, cross-platform C++ binding for the <a href="http://www.opengl.org">OpenGL API</a>.</p> <p><em>glbinding</em> leverages modern C++11 features like enum classes, lambdas, and variadic templates, instead of relying on macros; all OpenGL symbols are real functions and variables. It provides type-safe parameters, per feature API header, lazy function resolution, multi-context and multi-thread support, global and local function callbacks, meta information about the generated OpenGL binding and the OpenGL runtime, as well as tools and examples for quick-starting your projects. Based on the OpenGL API specification (<a href="https://cvs.khronos.org/svn/repos/ogl/trunk/doc/registry/public/api/gl.xml">gl.xml</a>) <em>glbinding</em> is generated using python scripts and templates that can be easily adapted to fit custom needs.</p>
 
-<h2>Documentations</h2>
-<ul class="nav flex-column">
+<h2>Available Documentations</h2>
+
+<div class="list-group">
   {% for s in site.documentations %}
-    <li class="nav-item">
-      <a class="nav-link" href="{{ site.baseurl }}/docs/{{ s }}">{{ s }}</a>
-    </li>
+    <a class="list-group-item list-group-item-active {% if site.documentation_states.[s] %}list-group-item-{{ site.documentation_states.[s] }}{% else %}list-group-item-danger{% endif %}" href="{{ site.baseurl }}/docs/{{ s }}">{{ s }}</a>
   {% endfor %}
-</ul>
+</div>
