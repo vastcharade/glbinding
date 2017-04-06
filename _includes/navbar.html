@@ -16,7 +16,7 @@
     <span class="dropdown-divider"></span>
     <a class="dropdown-item" href="{{ site.baseurl }}/docs">Documentations</a>
     {% for s in site.documentations %}
-      <a class="dropdown-item" href="{{ site.baseurl }}/docs/{{ s }}">{{ s }}</a>
+      <a class="dropdown-item" href="{{ site.baseurl }}/docs/{{ s.name }}">{{ s.name }}</a>
     {% endfor %}
   </div>
   <div class="collapse navbar-toggleable-xs">
@@ -29,7 +29,7 @@
       </li>
       <li class="nav-item active"><a class="nav-link" href="{{ site.baseurl }}/docs">Documentations</a></li>
       {% for s in site.documentations %}
-        <li class="nav-item"><a class="nav-link" href="{{ site.baseurl }}/docs/{{ s }}">{{ s }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ site.baseurl }}/docs/{{ s.name }}">{{ s.name }}</a></li>
       {% endfor %}
     </ul>
   </div>

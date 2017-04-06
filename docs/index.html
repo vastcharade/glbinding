@@ -6,8 +6,25 @@ link_to_home: true
 
 <h2>Available Documentations</h2>
 
-<div class="list-group">
-  {% for s in site.documentations %}
-    <a class="list-group-item list-group-item-active {% if site.documentation_states.[s] %}list-group-item-{{ site.documentation_states.[s] }}{% else %}list-group-item-danger{% endif %}" href="{{ site.baseurl }}/docs/{{ s }}">{{ s }}</a>
-  {% endfor %}
+<div class="container">
+  <div class="row">
+    {% for s in site.documentations %}
+      {% assign contextualcolor = 'secondary' %}
+      {% if s.status == 'stable' %}{% assign contextualcolor = 'primary' %}{% endif %}
+      {% if s.status == 'latest' %}{% assign contextualcolor = 'success' %}{% endif %}
+      {% if s.status == 'unstable' %}{% assign contextualcolor = 'info' %}{% endif %}
+      <div class="col-md-4 col-sm-6">
+        <div class="card card-outline-{{ contextualcolor }}">
+          <a class="nav-link active" href="{{ site.baseurl }}/docs/{{ s.name }}">
+          <div class="card-block">
+            <h2 class="text-center">{{ s.name }}</h2>
+          </div>
+          </a>
+          <div class="card-footer">
+            <span class="pull-xs-right tag tag-{{ contextualcolor }}">{{ s.status }}</span>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 </div>

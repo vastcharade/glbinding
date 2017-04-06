@@ -10,18 +10,26 @@ safe: true
 encoding: utf-8
 
 documentations:
-  - master
-  - v2.1
-  - v2.0
-  - v1.1
-  - v1.0
-
-documentation_states:
-  master: info
-  v2.1: success
-  v2.0: warning
-  v1.1: danger
-  v1.0: danger
+  - 
+    name: master
+    status: unstable
+    date: 05.04.2017
+  - 
+    name: v2.1
+    status: latest
+    date: 0
+  - 
+    name: v2.0
+    status: stable
+    date: 0
+  - 
+    name: v1.1
+    status: stable
+    date: 0
+  - 
+    name: v1.0
+    status: stable
+    date: 0
 
 markdown: kramdown
 highlighter: rouge
