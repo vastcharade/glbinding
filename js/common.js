@@ -41,5 +41,4 @@ function getURLParameter(sParam)
 
 $(function() {
     $("table").addClass("table table-sm table-hover");
-    $("table thead").addClass("thead-inverse");
 });
