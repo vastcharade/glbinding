@@ -12,7 +12,7 @@ link_to_home: true
       {% assign contextualcolor = 'secondary' %}
       {% if s.status == 'stable' %}{% assign contextualcolor = 'primary' %}{% endif %}
       {% if s.status == 'latest' %}{% assign contextualcolor = 'success' %}{% endif %}
-      {% if s.status == 'unstable' %}{% assign contextualcolor = 'info' %}{% endif %}
+      {% if s.status == 'unstable' %}{% assign contextualcolor = 'warning' %}{% endif %}
       <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
         <div class="card card-outline-{{ contextualcolor }}">
           <a class="nav-link active" href="{{ site.baseurl }}/docs/{{ s.name }}">

@@ -1,14 +1,14 @@
 /*!
- * Bootstrap v4.0.0-alpha.4 (http://getbootstrap.com)
- * Copyright 2011-2016 The Bootstrap Authors
- * Copyright 2011-2016 Twitter, Inc.
+ * Bootstrap v4.0.0-alpha.6 (https://getbootstrap.com)
+ * Copyright 2011-2017 The Bootstrap Authors
+ * Copyright 2011-2017 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 
 // Core variables and mixins
-@import "bootstrap-4.0.0-alpha.6/custom";
 @import "bootstrap-4.0.0-alpha.6/variables";
 @import "bootstrap-4.0.0-alpha.6/mixins";
+@import "bootstrap-4.0.0-alpha.6/custom";
 
 // Reset and dependencies
 @import "bootstrap-4.0.0-alpha.6/normalize";
@@ -25,8 +25,7 @@
 //@import "bootstrap-4.0.0-alpha.6/buttons";
 
 // Components
-//@import "bootstrap-4.0.0-alpha.6/animation";
-@import "bootstrap-4.0.0-alpha.6/badge";
+//@import "bootstrap-4.0.0-alpha.6/transitions";
 @import "bootstrap-4.0.0-alpha.6/dropdown";
 //@import "bootstrap-4.0.0-alpha.6/button-group";
 //@import "bootstrap-4.0.0-alpha.6/input-group";
@@ -36,16 +35,17 @@
 @import "bootstrap-4.0.0-alpha.6/card";
 //@import "bootstrap-4.0.0-alpha.6/breadcrumb";
 //@import "bootstrap-4.0.0-alpha.6/pagination";
+@import "bootstrap-4.0.0-alpha.6/badge";
 //@import "bootstrap-4.0.0-alpha.6/jumbotron";
 //@import "bootstrap-4.0.0-alpha.6/alert";
 //@import "bootstrap-4.0.0-alpha.6/progress";
 //@import "bootstrap-4.0.0-alpha.6/media";
-@import "bootstrap-4.0.0-alpha.6/list-group";
+//@import "bootstrap-4.0.0-alpha.6/list-group";
 //@import "bootstrap-4.0.0-alpha.6/responsive-embed";
-@import "bootstrap-4.0.0-alpha.6/close";
+//@import "bootstrap-4.0.0-alpha.6/close";
 
 // Components w/ JavaScript
-@import "bootstrap-4.0.0-alpha.6/modal";
+//@import "bootstrap-4.0.0-alpha.6/modal";
 //@import "bootstrap-4.0.0-alpha.6/tooltip";
 //@import "bootstrap-4.0.0-alpha.6/popover";
 //@import "bootstrap-4.0.0-alpha.6/carousel";
