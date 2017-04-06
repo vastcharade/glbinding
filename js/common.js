@@ -1,5 +1,4 @@
 ---
-layout: compress
 ---
 function initPage(demo)
 {
@@ -41,5 +40,6 @@ function getURLParameter(sParam)
 }
 
 $(function() {
-    $("table").addClass("table table-sm");
+    $("table").addClass("table table-sm table-hover");
+    $("table thead").addClass("thead-inverse");
 });
