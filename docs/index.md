@@ -2,7 +2,7 @@
 layout: default
 link_to_home: true
 ---
-<p><img src="{{ site.baseurl }}/glbinding-logo.png" alt="glbinding"></p> <p><em>glbinding</em> is an <a href="http://opensource.org/licenses/MIT">MIT licensed</a>, cross-platform C++ binding for the <a href="http://www.opengl.org">OpenGL API</a>.</p> <p><em>glbinding</em> leverages modern C++11 features like enum classes, lambdas, and variadic templates, instead of relying on macros; all OpenGL symbols are real functions and variables. It provides type-safe parameters, per feature API header, lazy function resolution, multi-context and multi-thread support, global and local function callbacks, meta information about the generated OpenGL binding and the OpenGL runtime, as well as tools and examples for quick-starting your projects. Based on the OpenGL API specification (<a href="https://cvs.khronos.org/svn/repos/ogl/trunk/doc/registry/public/api/gl.xml">gl.xml</a>) <em>glbinding</em> is generated using python scripts and templates that can be easily adapted to fit custom needs.</p>
+{% include glbinding-profile.md %}
 
 <h2>Available Documentations</h2>
 
@@ -30,3 +30,7 @@ link_to_home: true
     {% endfor %}
   </div>
 </div>
+
+#### Technical integration guide
+
+If you want to add a new or updated documentation for a specific release of {{ site.title }}, please refer to the [integration guide]({{ site.baseurl }}/docs/integration-guide.html).
