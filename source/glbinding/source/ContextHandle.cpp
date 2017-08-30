@@ -5,8 +5,10 @@
 #include <windows.h>
 #elif SYSTEM_DARWIN
 #include <OpenGL/OpenGL.h>
-#else
+#elif GLCONTEXT_GLX
 #include <GL/glx.h>
+#elif GLCONTEXT_EGL
+#include <EGL/egl.h>
 #endif
 
 
@@ -22,8 +24,10 @@ ContextHandle getCurrentContext()
     const auto context = wglGetCurrentContext();
 #elif SYSTEM_DARWIN
     const auto context = CGLGetCurrentContext();
-#else
+#elif GLCONTEXT_GLX
     const auto context = glXGetCurrentContext();
+#elif GLCONTEXT_EGL
+    const auto context = eglGetCurrentContext();
 #endif
     id = reinterpret_cast<ContextHandle>(context);
 

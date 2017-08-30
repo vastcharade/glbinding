@@ -9,8 +9,10 @@
     #include <cassert>
     #include <string>
     #include <dlfcn.h>
-#else
+#elif GLCONTEXT_GLX
     #include <GL/glx.h>
+#elif GLCONTEXT_EGL
+    #include <EGL/egl.h>
 #endif
 
 
@@ -43,10 +45,15 @@ ProcAddress getProcAddress(const char * name)
 
     auto procAddress = reinterpret_cast<PROCADDRESS>(symbol);
 
-#else
+#elif GLCONTEXT_GLX
 
     using PROCADDRESS = void (*)();
     const auto procAddress = reinterpret_cast<PROCADDRESS>(glXGetProcAddress(reinterpret_cast<const unsigned char*>(name)));
+
+#elif GLCONTEXT_EGL
+
+    using PROCADDRESS = void *;
+    const auto procAddress = reinterpret_cast<PROCADDRESS>(eglGetProcAddress(name));
 
 #endif
 

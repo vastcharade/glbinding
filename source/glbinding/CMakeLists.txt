@@ -1,18 +1,37 @@
 
-# 
+#
 # External dependencies
-# 
+#
 
 find_package(OpenGL REQUIRED)
 
+if(UNIX)
+    set(RENDERER_CONTEXT_TYPE "EGL" CACHE STRING "Renderer context type")
+    set_property(CACHE RENDERER_CONTEXT_TYPE PROPERTY STRINGS "GLX" "EGL")
+    message(STATUS "Render context type: " ${RENDERER_CONTEXT_TYPE})
+
+    if(${RENDERER_CONTEXT_TYPE} STREQUAL "GLX")
+        set(_GLBINDING_X11 1)
+        message(STATUS "Using X11 for window creation")
+        message(STATUS "Using GLX for opengl context creation")
+    elseif(${RENDERER_CONTEXT_TYPE} STREQUAL "EGL")
+        set(_GLBINDING_EGL 1)
+        message(STATUS "Using EGL for window creation")
+        message(STATUS "Using EGL for opengl context creation")
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/egl)
+    endif()
+endif()
+
 set(ADDITIONAL_LIBRARIES)
 set(ADDITIONAL_INCLUDES)
+set(ADDITIONAL_DEFS "" PARENT_SCOPE)
+
 if(OPTION_BUILD_WITH_BOOST_THREAD)
     find_package(Boost COMPONENTS thread REQUIRED)
-    
+
     if (Boost_FOUND)
         message(STATUS "Use Boost for thread.")
-        
+
         set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} ${Boost_LIBRARIES})
         set(ADDITIONAL_INCLUDES ${ADDITIONAL_INCLUDES} ${Boost_INCLUDE_DIRS})
     else()
@@ -21,9 +40,21 @@ if(OPTION_BUILD_WITH_BOOST_THREAD)
     endif()
 endif()
 
-# 
+if(_GLBINDING_X11)
+    find_package(X11 REQUIRED)
+    list(APPEND ADDITIONAL_INCLUDES "${X11_X11_INCLUDE_PATH}")
+    list(APPEND ADDITIONAL_LIBRARIES "${X11_X11_LIB}")
+    list(APPEND ADDITIONAL_DEFS "-DGLCONTEXT_GLX")
+elseif(_GLBINDING_EGL)
+    find_package(EGL REQUIRED)
+    list(APPEND ADDITIONAL_INCLUDES "${EGL_INCLUDE_DIR}")
+    list(APPEND ADDITIONAL_LIBRARIES "${EGL_LIBRARY}")
+    list(APPEND ADDITIONAL_DEFS "-DGLCONTEXT_EGL")
+endif()
+
+#
 # Library name and options
-# 
+#
 
 # Target name
 set(target glbinding)
@@ -40,9 +71,9 @@ set(template_export_file "include/${target}/${target}_api.h")
 set(export_macro         "${target_id}_API")
 
 
-# 
+#
 # Sources
-# 
+#
 
 set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/${target}")
 set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
@@ -91,7 +122,7 @@ list(APPEND headers ${featured_includes})
 set(sources
     ${source_path}/callbacks_private.h
     ${source_path}/callbacks.cpp
-    
+
     ${source_path}/AbstractFunction.cpp
     ${source_path}/AbstractValue.cpp
     ${source_path}/Binding.cpp
@@ -138,7 +169,7 @@ set(sources
 file(GLOB splitted_binding_sources ${source_path}/Binding_objects_*.cpp)
 file(GLOB splitted_functions_sources ${source_path}/gl/functions_*.cpp)
 
-list(APPEND sources 
+list(APPEND sources
     ${splitted_binding_sources}
     ${splitted_functions_sources}
 )
@@ -154,20 +185,20 @@ endif()
 # Group source files
 set(header_group "Header Files (API)")
 set(source_group "Source Files")
-source_group_by_path(${include_path} "\\\\.h$|\\\\.inl$" 
+source_group_by_path(${include_path} "\\\\.h$|\\\\.inl$"
     ${header_group} ${headers})
-source_group_by_path(${source_path}  "\\\\.cpp$|\\\\.c$|\\\\.h$|\\\\.inl$" 
+source_group_by_path(${source_path}  "\\\\.cpp$|\\\\.c$|\\\\.h$|\\\\.inl$"
     ${source_group} ${sources})
 
 
-# 
+#
 # Create library
-# 
+#
 
 # since we use stl and stl is intended to use exceptions, exceptions should not be disabled
 #if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
-    # workaround for removing default flags 
-    # string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}) 
+    # workaround for removing default flags
+    # string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 #endif ()
 
 
@@ -216,9 +247,9 @@ else()
 endif()
 
 
-# 
+#
 # Project options
-# 
+#
 
 set_target_properties(${target}
     PROPERTIES
@@ -229,9 +260,9 @@ set_target_properties(${target}
 )
 
 
-# 
+#
 # Include directories
-# 
+#
 
 target_include_directories(${target}
     PRIVATE
@@ -250,9 +281,9 @@ target_include_directories(${target}
 )
 
 
-# 
+#
 # Libraries
-# 
+#
 
 target_link_libraries(${target}
     PRIVATE
@@ -266,16 +297,17 @@ target_link_libraries(${target}
 )
 
 
-# 
+#
 # Compile definitions
-# 
+#
 
 target_compile_definitions(${target}
     PRIVATE
     # since we use stl and stl is intended to use exceptions, exceptions should not be disabled
     # furthermore, this flag is not officially supported
-    #$<$<CXX_COMPILER_ID:MSVC>:_HAS_EXCEPTIONS=0> 
+    #$<$<CXX_COMPILER_ID:MSVC>:_HAS_EXCEPTIONS=0>
     $<$<AND:$<BOOL:${OPTION_BUILD_WITH_BOOST_THREAD}>,$<BOOL:${Boost_FOUND}>>:GLBINDING_USE_BOOST_THREAD>
+    ${ADDITIONAL_DEFS}
 
     PUBLIC
     $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:${target_id}_STATIC_DEFINE>
@@ -285,9 +317,9 @@ target_compile_definitions(${target}
 )
 
 
-# 
+#
 # Compile options
-# 
+#
 
 target_compile_options(${target}
     PRIVATE
@@ -299,9 +331,9 @@ target_compile_options(${target}
 )
 
 
-# 
+#
 # Linker options
-# 
+#
 
 target_link_libraries(${target}
     PRIVATE
@@ -344,9 +376,9 @@ perform_health_checks(
 )
 
 
-# 
+#
 # Deployment
-# 
+#
 
 # Library
 install(TARGETS ${target}
