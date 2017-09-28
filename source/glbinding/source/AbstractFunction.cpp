@@ -88,14 +88,13 @@ void AbstractFunction::neglectState(const int pos)
 
     if (pos == s_maxpos)
     {
-        const auto size = static_cast<std::size_t>(std::max(0, pos - 1));
         for (auto function : Binding::functions())
         {
-            function->m_states.resize(size);
+            function->m_states.resize(s_maxpos);
         }
         for (auto function : Binding::additionalFunctions())
         {
-            function->m_states.resize(size);
+            function->m_states.resize(s_maxpos);
         }
         --s_maxpos;
     }
