@@ -3,8 +3,6 @@
 # External dependencies
 #
 
-find_package(OpenGL REQUIRED)
-
 if(UNIX)
     set(RENDERER_CONTEXT_TYPE "EGL" CACHE STRING "Renderer context type")
     set_property(CACHE RENDERER_CONTEXT_TYPE PROPERTY STRINGS "GLX" "EGL")
@@ -12,13 +10,9 @@ if(UNIX)
 
     if(${RENDERER_CONTEXT_TYPE} STREQUAL "GLX")
         set(_GLBINDING_X11 1)
-        message(STATUS "Using X11 for window creation")
-        message(STATUS "Using GLX for opengl context creation")
     elseif(${RENDERER_CONTEXT_TYPE} STREQUAL "EGL")
         set(_GLBINDING_EGL 1)
-        message(STATUS "Using EGL for window creation")
-        message(STATUS "Using EGL for opengl context creation")
-        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/egl)
+	#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/egl)
     endif()
 endif()
 
@@ -41,14 +35,14 @@ if(OPTION_BUILD_WITH_BOOST_THREAD)
 endif()
 
 if(_GLBINDING_X11)
-    find_package(X11 REQUIRED)
-    list(APPEND ADDITIONAL_INCLUDES "${X11_X11_INCLUDE_PATH}")
-    list(APPEND ADDITIONAL_LIBRARIES "${X11_X11_LIB}")
+    find_package(OpenGL REQUIRED COMPONENTS OpenGL GLX)
+    list(APPEND ADDITIONAL_LIBRARIES "OpenGL::OpenGL")
+    list(APPEND ADDITIONAL_LIBRARIES "OpenGL::GLX")
     list(APPEND ADDITIONAL_DEFS "-DGLCONTEXT_GLX")
 elseif(_GLBINDING_EGL)
-    find_package(EGL REQUIRED)
-    list(APPEND ADDITIONAL_INCLUDES "${EGL_INCLUDE_DIR}")
-    list(APPEND ADDITIONAL_LIBRARIES "${EGL_LIBRARY}")
+    find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL)
+    list(APPEND ADDITIONAL_LIBRARIES "OpenGL::OpenGL")
+    list(APPEND ADDITIONAL_LIBRARIES "OpenGL::EGL")
     list(APPEND ADDITIONAL_DEFS "-DGLCONTEXT_EGL")
 endif()
 
@@ -291,7 +285,6 @@ target_link_libraries(${target}
 
     PUBLIC
     ${DEFAULT_LIBRARIES}
-    ${OPENGL_LIBRARIES}
 
     INTERFACE
 )
