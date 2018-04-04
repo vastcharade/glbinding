@@ -172,7 +172,9 @@ else()
     set(_OPENGL_INCLUDE_PATH
       /boot/develop/headers/os/opengl)
   else()
-    file(GLOB _OPENGL_LIB_PATH "/usr/lib*/nvidia*")
+    # check system for installed nvidia drivers, usually in /usr/lib/nvidia-<driverversion>
+    # /usr/lib/nvidia* will take precedence over /usr/lib32/nvidia* and the like
+    file(GLOB _OPENGL_LIB_PATH "/usr/lib/nvidia*" "/usr/lib?*/nvidia*")
     if (NOT _OPENGL_LIB_PATH STREQUAL "")
       # if we found system-wide nvidia libs, let's make sure
       # to use them and not unintentionally use other default
@@ -196,7 +198,7 @@ else()
     ${_OPENGL_INCLUDE_PATH}
   )
   find_path(OPENGL_GLX_INCLUDE_DIR GL/glx.h ${_OPENGL_INCLUDE_PATH})
-  find_path(OPENGL_EGL_INCLUDE_DIR EGL/egl.h ${_OPENGL_INCLUDE_PATH})
+  find_path(OPENGL_EGL_INCLUDE_DIR EGL/egl.h ${CMAKE_CURRENT_SOURCE_DIR}/include/egl ${_OPENGL_INCLUDE_PATH})
   find_path(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
     /usr/share/doc/NVIDIA_GLX-1.0/include
     /usr/openwin/share/include

@@ -12,7 +12,6 @@ if(UNIX)
         set(_GLBINDING_X11 1)
     elseif(${RENDERER_CONTEXT_TYPE} STREQUAL "EGL")
         set(_GLBINDING_EGL 1)
-	#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/egl)
     endif()
 endif()
 
