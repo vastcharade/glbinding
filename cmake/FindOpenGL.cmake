@@ -5,6 +5,19 @@
 # FindOpenGL
 # ----------
 #
+##############################################################################
+#
+# NOTE: this is copied from the cmake 3.11 stock version of FindOpenGL.cmake
+# (https://github.com/Kitware/CMake/blob/v3.11.0/Modules/FindOpenGL.cmake)
+# There have been some modifications made specifically for MapD use.
+# They are noted by the following comments:
+#
+# # NOTE: MapD-customization(<developer>)
+#
+# You can also run a diff against the above link
+#
+##############################################################################
+#
 # FindModule for OpenGL and GLU.
 #
 # Optional COMPONENTS
@@ -172,16 +185,13 @@ else()
     set(_OPENGL_INCLUDE_PATH
       /boot/develop/headers/os/opengl)
   else()
-    # check system for installed nvidia drivers, usually in /usr/lib/nvidia-<driverversion>
+    # NOTE: MapD-customization(croot) - checking nvidia driver installed libraries.
+    # doing this because nvidia doesn't automatically install doesn't its dev libs
+    # in the typical system libs area, so other libs might be present (such as mesa).
+    # Doing a glob here to grab the nvidia lib paths to use.
+    # These are usually in /usr/lib/nvidia-<driverversion>
     # /usr/lib/nvidia* will take precedence over /usr/lib32/nvidia* and the like
     file(GLOB _OPENGL_LIB_PATH "/usr/lib/nvidia*" "/usr/lib?*/nvidia*")
-    if (NOT _OPENGL_LIB_PATH STREQUAL "")
-      # if we found system-wide nvidia libs, let's make sure
-      # to use them and not unintentionally use other default
-      # installed driver libs (i.e. mesa)
-      # Adding NO_DEFAULT_PATH to ensure
-      list(APPEND _OPENGL_LIB_PATH NO_DEFAULT_PATH)
-    endif()
   endif()
 
   # The first line below is to make sure that the proper headers
@@ -198,7 +208,14 @@ else()
     ${_OPENGL_INCLUDE_PATH}
   )
   find_path(OPENGL_GLX_INCLUDE_DIR GL/glx.h ${_OPENGL_INCLUDE_PATH})
-  find_path(OPENGL_EGL_INCLUDE_DIR EGL/egl.h ${CMAKE_CURRENT_SOURCE_DIR}/include/egl ${_OPENGL_INCLUDE_PATH})
+
+  # NOTE: MapD-customization(croot) - adding the ${CMAKE_SOURCE_DIR}/ThirdParty/egl
+  # directory to the following find_path() call. This is in order to use the EGL
+  # headers included with the mapd-core distro. The EGL headers are not added to
+  # linux systems by default, tho the libraries generally are. This ensures that the
+  # headers exist. The mapd-core EGL headers are the v1.5, and are found here:
+  # https://www.khronos.org/registry/EGL/
+  find_path(OPENGL_EGL_INCLUDE_DIR EGL/egl.h ${CMAKE_SOURCE_DIR}/ThirdParty/egl ${_OPENGL_INCLUDE_PATH})
   find_path(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
     /usr/share/doc/NVIDIA_GLX-1.0/include
     /usr/openwin/share/include
@@ -207,19 +224,23 @@ else()
 
   # Search for the GLVND libraries.  We do this regardless of COMPONENTS; we'll
   # take into account the COMPONENTS logic later.
+
+  # NOTE: MapD-customization(croot) - adding HINTS instead of PATHS for the following
+  # 3 find_library calls in order that the nvidia install libs are checked first
+  # before the system libs
   find_library(OPENGL_opengl_LIBRARY
     NAMES OpenGL
-    PATHS ${_OPENGL_LIB_PATH}
+    HINTS ${_OPENGL_LIB_PATH}
   )
 
   find_library(OPENGL_glx_LIBRARY
     NAMES GLX
-    PATHS ${_OPENGL_LIB_PATH}
+    HINTS ${_OPENGL_LIB_PATH}
   )
 
   find_library(OPENGL_egl_LIBRARY
     NAMES EGL
-    PATHS ${_OPENGL_LIB_PATH}
+    HINTS ${_OPENGL_LIB_PATH}
   )
 
   find_library(OPENGL_glu_LIBRARY
@@ -247,18 +268,31 @@ else()
     # at least one GLVND component.  Prefer GLVND for legacy GL.
     set(OpenGL_GL_PREFERENCE "GLVND")
   else()
-    # No preference was explicitly specified and no GLVND components were
-    # requested.  Use a policy to choose the default.
-    cmake_policy(GET CMP0072 _OpenGL_GL_POLICY)
-    if("x${_OpenGL_GL_POLICY}x" STREQUAL "xNEWx")
-      set(OpenGL_GL_PREFERENCE "GLVND")
-    else()
-      set(OpenGL_GL_PREFERENCE "LEGACY")
-      if("x${_OpenGL_GL_POLICY}x" STREQUAL "xx")
-        set(_OpenGL_GL_POLICY_WARN 1)
+    # NOTE: MapD-customization(croot): checking for the existence
+    # of the CMP0072 policy, which was added in cmake 3.11
+    # (https://cmake.org/cmake/help/v3.11/policy/CMP0072.html).
+    # For mapd-core builds we want to be compatible with cmake at least
+    # 3.5, so we check for the existence of the policy first.
+    # If it doesn't exist, we'll use LEGACY as the default.
+    if (POLICY CMP0072)
+      # No preference was explicitly specified and no GLVND components were
+      # requested.  Use a policy to choose the default.
+      # The policy CMP0072 was introduced in cmake 11.
+      # If the policy doesn't exist, we'll default to use GLVND
+      cmake_policy(GET CMP0072 _OpenGL_GL_POLICY)
+      if("x${_OpenGL_GL_POLICY}x" STREQUAL "xNEWx")
+        set(OpenGL_GL_PREFERENCE "GLVND")
+      else()
+        set(OpenGL_GL_PREFERENCE "LEGACY")
+        if("x${_OpenGL_GL_POLICY}x" STREQUAL "xx")
+          set(_OpenGL_GL_POLICY_WARN 1)
+        endif()
       endif()
+      unset(_OpenGL_GL_POLICY)
+    else()
+      # no policy, so we'll use GLVND by default
+      set(OpenGL_GL_PREFERENCE "LEGACY")
     endif()
-    unset(_OpenGL_GL_POLICY)
   endif()
 
   if("x${OpenGL_GL_PREFERENCE}x" STREQUAL "xGLVNDx" AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
@@ -312,7 +346,13 @@ else()
      (NOT OPENGL_USE_EGL AND
           OPENGL_opengl_LIBRARY AND
           OPENGL_glx_LIBRARY) OR
-     (    OPENGL_USE_EGL))
+     # NOTE: MapD-customization(croot) - adding the 
+     # OPENGL_USE_EGL && OPENGL_opengl_LIBRARY
+     # logic. We can have EGL without GLVND, so this logic
+     # only adds the OPENGL_opengl_LIBRARY requirement if 
+     # both are found.
+     (    OPENGL_USE_EGL AND
+          OPENGL_opengl_LIBRARY))
     list(APPEND _OpenGL_REQUIRED_VARS OPENGL_opengl_LIBRARY)
   endif()
 
@@ -345,6 +385,14 @@ else()
           OPENGL_gl_LIBRARY) OR
      (NOT OPENGL_USE_EGL AND
       NOT OPENGL_glx_LIBRARY AND
+          OPENGL_gl_LIBRARY) OR
+     # NOTE: MapD-customization(croot) - adding the 
+     # OPENGL_USE_EGL && !OPENGL_opengl_LIBRARY && OPENGL_gl_LIBRARY
+     # logic. We can have EGL without GLVND now, so this logic
+     # adds the OPENGL_gl_LIBRARY requirement if 
+     # both egl & gl are found.
+     (    OPENGL_USE_EGL AND
+      NOT OPENGL_opengl_LIBRARY AND
           OPENGL_gl_LIBRARY))
     list(APPEND _OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
   endif()
@@ -425,24 +473,9 @@ if(OPENGL_FOUND)
                           "${OPENGL_INCLUDE_DIR}")
   endif()
 
-  # ::GLX is a GLVND library, and thus Linux-only: we don't bother checking
-  # for a framework version of this library.
-  if(OpenGL_GLX_FOUND AND NOT TARGET OpenGL::GLX)
-    if(IS_ABSOLUTE "${OPENGL_glx_LIBRARY}")
-      add_library(OpenGL::GLX UNKNOWN IMPORTED)
-      set_target_properties(OpenGL::GLX PROPERTIES IMPORTED_LOCATION
-                            "${OPENGL_glx_LIBRARY}")
-    else()
-      add_library(OpenGL::GLX INTERFACE IMPORTED)
-      set_target_properties(OpenGL::GLX PROPERTIES IMPORTED_LIBNAME
-                            "${OPENGL_glx_LIBRARY}")
-    endif()
-    set_target_properties(OpenGL::GLX PROPERTIES INTERFACE_LINK_LIBRARIES
-                          OpenGL::OpenGL)
-    set_target_properties(OpenGL::GLX PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                          "${OPENGL_GLX_INCLUDE_DIR}")
-  endif()
-
+  # NOTE: MapD-customization(croot) - changing the logic around here
+  # quite a bit to handle the fact that glx & egl do not have to be
+  # glvnd only. So glx & gl or glx & opengl or egl & gl or egl & opengl
   if(OPENGL_gl_LIBRARY AND NOT TARGET OpenGL::GL)
     # A legacy GL library is available, so use it for the legacy GL target.
     if(IS_ABSOLUTE "${OPENGL_gl_LIBRARY}")
@@ -465,16 +498,29 @@ if(OPENGL_FOUND)
     endif()
     set_target_properties(OpenGL::GL PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${OPENGL_INCLUDE_DIR}")
-  elseif(NOT TARGET OpenGL::GL AND TARGET OpenGL::OpenGL AND TARGET OpenGL::GLX)
-    # A legacy GL library is not available, but we can provide the legacy GL
-    # target using GLVND OpenGL+GLX.
-    add_library(OpenGL::GL INTERFACE IMPORTED)
-    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_LINK_LIBRARIES
-                          OpenGL::OpenGL)
-    set_property(TARGET OpenGL::GL APPEND PROPERTY INTERFACE_LINK_LIBRARIES
-                 OpenGL::GLX)
-    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                          "${OPENGL_INCLUDE_DIR}")
+  endif()
+
+  # ::GLX is a GLVND library, and thus Linux-only: we don't bother checking
+  # for a framework version of this library.
+  if(OpenGL_GLX_FOUND AND NOT TARGET OpenGL::GLX)
+    if(IS_ABSOLUTE "${OPENGL_glx_LIBRARY}")
+      add_library(OpenGL::GLX UNKNOWN IMPORTED)
+      set_target_properties(OpenGL::GLX PROPERTIES IMPORTED_LOCATION
+                            "${OPENGL_glx_LIBRARY}")
+    else()
+      add_library(OpenGL::GLX INTERFACE IMPORTED)
+      set_target_properties(OpenGL::GLX PROPERTIES IMPORTED_LIBNAME
+                            "${OPENGL_glx_LIBRARY}")
+    endif()
+    if (TARGET OpenGL::OpenGL)
+        set_target_properties(OpenGL::GLX PROPERTIES INTERFACE_LINK_LIBRARIES
+                              OpenGL::OpenGL)
+    else()
+        set_target_properties(OpenGL::GLX PROPERTIES INTERFACE_LINK_LIBRARIES
+                              OpenGL::GL)
+    endif()
+    set_target_properties(OpenGL::GLX PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                          "${OPENGL_GLX_INCLUDE_DIR}")
   endif()
 
   # ::EGL is a GLVND library, and thus Linux-only: we don't bother checking
@@ -482,7 +528,7 @@ if(OPENGL_FOUND)
   # Note we test for OpenGL::OpenGL as a target.  When this module is updated to
   # support GLES, we would additionally want to check for the hypothetical GLES
   # target and enable EGL if either ::GLES or ::OpenGL is created.
-  if(TARGET OpenGL::OpenGL AND OpenGL_EGL_FOUND AND NOT TARGET OpenGL::EGL)
+  if(OpenGL_EGL_FOUND AND NOT TARGET OpenGL::EGL)
     if(IS_ABSOLUTE "${OPENGL_egl_LIBRARY}")
       add_library(OpenGL::EGL UNKNOWN IMPORTED)
       set_target_properties(OpenGL::EGL PROPERTIES IMPORTED_LOCATION
@@ -492,11 +538,33 @@ if(OPENGL_FOUND)
       set_target_properties(OpenGL::EGL PROPERTIES IMPORTED_LIBNAME
                             "${OPENGL_egl_LIBRARY}")
     endif()
-    set_target_properties(OpenGL::EGL PROPERTIES INTERFACE_LINK_LIBRARIES
-                          OpenGL::OpenGL)
+    if (TARGET OpenGL::OpenGL)
+        set_target_properties(OpenGL::EGL PROPERTIES INTERFACE_LINK_LIBRARIES
+                              OpenGL::OpenGL)
+    else()
+        set_target_properties(OpenGL::EGL PROPERTIES INTERFACE_LINK_LIBRARIES
+                              OpenGL::GL)
+    endif()
     # Note that EGL's include directory is different from OpenGL/GLX's!
     set_target_properties(OpenGL::EGL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
                           "${OPENGL_EGL_INCLUDE_DIR}")
+  endif()
+
+  if(NOT TARGET OpenGL::GL AND TARGET OpenGL::OpenGL)
+    # A legacy GL library is not available, but we can provide the legacy GL
+    # target using GLVND OpenGL+GLX or OpenGL+EGL.
+    add_library(OpenGL::GL INTERFACE IMPORTED)
+    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_LINK_LIBRARIES
+                          OpenGL::OpenGL)
+    if (TARGET OpenGL::GLX)
+        set_property(TARGET OpenGL::GL APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+                     OpenGL::GLX)
+    elseif (TARGET OpenG::EGL)
+        set_property(TARGET OpenGL::GL APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+                     OpenGL::EGL)
+    endif()
+    set_target_properties(OpenGL::GL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                          "${OPENGL_INCLUDE_DIR}")
   endif()
 
   if(OPENGL_GLU_FOUND AND NOT TARGET OpenGL::GLU)
