@@ -33,6 +33,9 @@ if(OPTION_BUILD_WITH_BOOST_THREAD)
     endif()
 endif()
 
+# in case the egl headers aren't installed on the machine, use our
+# internal stock of those headers
+set (_OPENGL_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/egl)
 if(_GLBINDING_X11)
     find_package(OpenGL REQUIRED COMPONENTS OpenGL GLX)
     list(APPEND ADDITIONAL_LIBRARIES "OpenGL::GLX")
